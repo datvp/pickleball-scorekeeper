@@ -23,7 +23,36 @@ npm run build      # kiểm tra kiểu + build ra dist/
 npm run preview
 ```
 
-Yêu cầu Node.js 20 trở lên. `dist/` là static site (`base: './'`), có thể đưa lên GitHub Pages, Netlify, Vercel hoặc Cloudflare Pages.
+Yêu cầu Node.js 20 trở lên. `dist/` là static site (`base: './'` khi build cục bộ), có thể đưa lên GitHub Pages, Netlify, Vercel hoặc Cloudflare Pages. Workflow GitHub Pages tự đặt `base` theo đường dẫn repository.
+
+## Cài trên iPhone dưới dạng PWA
+
+PWA cho phép mở ứng dụng từ Safari và thêm biểu tượng lên Màn hình chính; đây không phải file IPA và không cần Mac hay Apple Developer. Dự án dùng service worker để lưu giao diện ứng dụng cho lần mở offline sau lần tải đầu tiên. Dữ liệu trận đấu vẫn chỉ lưu trên thiết bị bằng `localStorage`, không được đồng bộ lên đám mây.
+
+Để phát hành qua GitHub Pages:
+
+1. Trong repository, mở **Settings → Pages** và chọn **GitHub Actions** làm nguồn triển khai.
+2. Push lên nhánh `main` hoặc chạy workflow **Deploy PWA to GitHub Pages** trong tab **Actions**.
+3. Sau khi workflow hoàn tất, mở URL GitHub Pages của repository trên iPhone bằng Safari.
+4. Chọn **Share → Add to Home Screen**, rồi mở ứng dụng từ biểu tượng vừa thêm.
+
+PWA cần HTTPS để cài và dùng service worker. Khi cập nhật phiên bản, service worker tự động nhận bản build mới. Tài nguyên Google Fonts bên ngoài cần kết nối mạng; ứng dụng dùng font dự phòng khi offline.
+
+## Chạy như ứng dụng iOS / Android
+
+Ứng dụng dùng Capacitor để đóng gói giao diện web thành app native:
+
+```bash
+npm install
+npm run cap:sync
+npm run cap:open:android
+# hoặc
+npm run cap:open:ios
+```
+
+`cap:sync` build web app rồi đồng bộ vào hai project native. Android cần Android Studio cùng Android SDK; mở project bằng lệnh trên rồi chạy trên emulator/thiết bị hoặc tạo signed App Bundle trong Android Studio. iOS cần macOS và Xcode; mở project bằng lệnh trên, chọn signing team rồi Archive để phân phối lên App Store. Không thể build/ký iOS trên Windows.
+
+`appId` hiện là `com.pickleballscorekeeper.app` trong `capacitor.config.ts`; hãy đổi thành application/bundle ID thuộc quyền kiểm soát của bạn trước khi phát hành. Tên, icon, ảnh khởi chạy và metadata cửa hàng cũng cần được hoàn thiện trước khi gửi duyệt.
 
 ## Cấu trúc
 
