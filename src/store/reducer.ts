@@ -52,10 +52,16 @@ export interface AppState {
 
 export const DEFAULT_SETTINGS: Settings = {
   lang: 'vi',
-  theme: 'dark',
+  theme: 'soft-sage',
   keepAwake: true,
   haptics: true,
 };
+
+const THEME_NAMES: readonly ThemeName[] = ['soft-sage', 'blush', 'linen', 'taupe', 'deep-sage'];
+
+function isThemeName(theme: unknown): theme is ThemeName {
+  return THEME_NAMES.some((name) => name === theme);
+}
 
 export const DEFAULT_CONFIG: MatchConfig = {
   type: 'd',
@@ -93,8 +99,15 @@ export type Action =
 export function createInitialState(
   persisted?: Partial<Pick<AppState, 'settings' | 'history' | 'match'>>,
 ): AppState {
+  const persistedSettings = persisted?.settings;
   return {
-    settings: { ...DEFAULT_SETTINGS, ...persisted?.settings },
+    settings: {
+      ...DEFAULT_SETTINGS,
+      ...persistedSettings,
+      theme: isThemeName(persistedSettings?.theme)
+        ? persistedSettings.theme
+        : DEFAULT_SETTINGS.theme,
+    },
     history: persisted?.history ?? [],
     match: persisted?.match ?? null,
     view: 'home',

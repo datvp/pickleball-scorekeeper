@@ -1,5 +1,5 @@
 export type Lang = 'vi' | 'en';
-export type ThemeName = 'light' | 'dark' | 'outdoor';
+export type ThemeName = 'soft-sage' | 'blush' | 'linen' | 'taupe' | 'deep-sage';
 
 export type TeamIndex = 0 | 1;
 export type Score = [number, number];
