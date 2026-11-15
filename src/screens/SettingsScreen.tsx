@@ -50,9 +50,11 @@ export function SettingsScreen() {
           value={settings.theme}
           onChange={(theme) => dispatch({ type: 'SET_THEME', theme })}
           options={[
-            { value: 'light', label: t('light') },
-            { value: 'dark', label: t('dark') },
-            { value: 'outdoor', label: t('out') },
+            { value: 'soft-sage', label: t('softSage') },
+            { value: 'blush', label: t('blush') },
+            { value: 'linen', label: t('linen') },
+            { value: 'taupe', label: t('taupe') },
+            { value: 'deep-sage', label: t('deepSage') },
           ]}
         />
       </div>

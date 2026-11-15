@@ -32,5 +32,12 @@ describe('every screen renders', () => {
       <AppContext.Provider value={{ state, dispatch: noop }}><App /></AppContext.Provider>,
     );
     expect(html).toContain(text);
+    if (view === 'settings') {
+      expect(html).toContain('Xanh sage nhạt');
+      expect(html).toContain('Hồng phấn');
+      expect(html).toContain('Vải linen');
+      expect(html).toContain('Nâu taupe');
+      expect(html).toContain('Xanh sage đậm');
+    }
   });
 });

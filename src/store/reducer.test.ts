@@ -66,7 +66,20 @@ describe('app flow', () => {
 
   it('toggles and settings', () => {
     let s = createInitialState();
-    s = run(s, { type: 'TOGGLE', key: 'haptics' }, { type: 'SET_LANG', lang: 'en' }, { type: 'SET_THEME', theme: 'outdoor' });
-    expect(s.settings).toMatchObject({ haptics: false, lang: 'en', theme: 'outdoor' });
+    s = run(s, { type: 'TOGGLE', key: 'haptics' }, { type: 'SET_LANG', lang: 'en' }, { type: 'SET_THEME', theme: 'blush' });
+    expect(s.settings).toMatchObject({ haptics: false, lang: 'en', theme: 'blush' });
+  });
+
+  it('uses the default theme for legacy or invalid persisted themes', () => {
+    expect(createInitialState(JSON.parse('{"settings":{"theme":"dark"}}')).settings.theme).toBe('soft-sage');
+    expect(createInitialState(JSON.parse('{"settings":{"theme":"unknown"}}')).settings.theme).toBe('soft-sage');
+  });
+
+  it('preserves a supported persisted theme', () => {
+    expect(
+      createInitialState({
+        settings: { lang: 'vi', theme: 'deep-sage', keepAwake: true, haptics: true },
+      }).settings.theme,
+    ).toBe('deep-sage');
   });
 });
