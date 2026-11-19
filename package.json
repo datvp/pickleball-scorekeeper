@@ -15,9 +15,13 @@
     "cap:open:ios": "cap open ios"
   },
   "dependencies": {
+    "@aparajita/capacitor-secure-storage": "^8.0.1",
     "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.6.2",
     "@capacitor/ios": "^8.6.2",
+    "@supabase/supabase-js": "^2.119.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

@@ -9,6 +9,10 @@
 - 1 ván hoặc Best of 3; điểm đích 11 / 15 / 21; cách 2 điểm hoặc cách 1 điểm
 - Một chạm cho mỗi rally, **Hoàn tác** không giới hạn, tạm dừng, nhãn *Game point* / *Match point*, báo *Đổi giao*
 - Lịch sử trận, bảng người chơi, thống kê, chia sẻ kết quả (Web Share / copy)
+- Danh bạ hồ sơ người chơi lưu cục bộ với ID ổn định; hồ sơ được tạo từ lịch sử tên cũ khi nâng cấp dữ liệu. Supabase Auth hỗ trợ email OTP, Google và Apple khi đã cấu hình; chế độ khách vẫn hoạt động.
+- Tạo giải đơn/đôi theo thể thức vòng tròn hoặc loại trực tiếp, tự xếp lịch và sân, dùng lại bộ chấm điểm MVP; lịch giải và bảng xếp hạng chỉ lưu trên thiết bị.
+- Ở lần chạy đầu tiên trên thiết bị mới, ứng dụng tự seed một bộ dữ liệu demo với 20 người chơi và 1 giải đấu để kiểm tra nhanh flow tạo giải và fixtures.
+- Hồ sơ có thể đặt visibility riêng tư, gửi yêu cầu liên kết cần Owner/Co-organizer phê duyệt; Supabase migrations định nghĩa membership và RLS. Lời mời, đồng bộ giải đấu và xử lý xung đột chưa được bật.
 - 3 giao diện (Sáng / Tối / Ngoài trời độ tương phản cao), 2 ngôn ngữ (Tiếng Việt / English)
 - Giữ màn hình sáng (Screen Wake Lock) và rung khi ghi điểm
 - Dữ liệu lưu cục bộ trong `localStorage`, tiếp tục được trận đang chơi sau khi tải lại trang
@@ -54,17 +58,30 @@ npm run cap:open:ios
 
 `appId` hiện là `com.pickleballscorekeeper.app` trong `capacitor.config.ts`; hãy đổi thành application/bundle ID thuộc quyền kiểm soát của bạn trước khi phát hành. Tên, icon, ảnh khởi chạy và metadata cửa hàng cũng cần được hoàn thiện trước khi gửi duyệt.
 
+## Cấu hình Supabase Auth
+
+1. Tạo Supabase project và bật Email trong **Authentication → Sign In / Providers**. Cấu hình email OTP (`{{ .Token }}`), email confirmation theo nhu cầu và minimum password length tối thiểu 8 ký tự. Google và Apple tạm thời chưa được dùng trong giao diện.
+2. Sao chép `.env.example` thành `.env.local`, rồi điền project URL và public anon/publishable key. Không đặt service-role key trong app hoặc commit credentials.
+3. Thêm redirect URLs `http://localhost:5173/auth/callback`, `http://127.0.0.1:5173/auth/callback` và `pickleballscorekeeper://auth/callback` vào Auth redirect allowlist. URL callback phải khớp với hostname đang mở ứng dụng.
+4. Áp dụng migrations bằng Supabase CLI (`npx supabase link` rồi `npx supabase db push`). Để chạy RLS tests cục bộ cần Docker và Supabase CLI: `npx supabase start`, sau đó `npx supabase test db`.
+5. Sau khi thêm/cập nhật Capacitor plugins, chạy `npm run cap:sync` rồi build lại ứng dụng native.
+
+Đăng ký tài khoản dùng username, email và password; đăng nhập bằng email/password hoặc mã OTP (Supabase Auth không hỗ trợ đăng nhập chỉ bằng username). Supabase Auth tự quản lý password hash; username được lưu riêng trong `public.account_profiles` và phải duy nhất, không phân biệt chữ hoa/thường. Không lưu password plaintext trong bảng ứng dụng. Đăng nhập không tự tải dữ liệu guest lên cloud; đăng xuất không xóa dữ liệu local. Tournament hiện có vẫn là local-only. Các bảng shared tournament/RLS và profile-link APIs là nền tảng bảo mật; invitations, shared-tournament sync, offline queues, conflict handling và audit/correction UX vẫn là các bước sau.
+
 ## Cấu trúc
 
 ```
 src/
+├── auth/                # Supabase Auth context, callback handling, secure session storage
 ├── domain/              # Logic thuần, không phụ thuộc React
-│   ├── types.ts         # Kiểu dữ liệu: Match, MatchConfig, SavedMatch...
+│   ├── types.ts         # Kiểu dữ liệu: Match, PlayerProfile, Tournament, MatchConfig...
 │   ├── scoring.ts       # createMatch, applyRally, undo, nextGame, canEndGame...
 │   ├── players.ts       # Tên mặc định, kiểm tra trùng tên, thống kê người chơi
+│   ├── tournaments.ts   # Fixture Round Robin/Single Elimination và standings
+│   ├── permissions.ts   # Ma trận quyền per-tournament và policy evaluation
 │   └── scoring.test.ts
 ├── store/
-│   ├── reducer.ts       # Toàn bộ state + action (điều hướng, cài đặt, trận đấu)
+│   ├── reducer.ts       # Toàn bộ state + action (điều hướng, giải đấu, trận đấu)
 │   ├── AppContext.tsx   # Provider, useApp(), useT()
 │   ├── storage.ts       # Lưu / nạp localStorage
 │   └── reducer.test.ts
@@ -72,7 +89,7 @@ src/
 ├── hooks/useWakeLock.ts # Wake Lock + vibrate
 ├── components/          # Segmented, Modal, BottomNav, MatchCard, GameList...
 ├── screens/             # Home, Setup, PlayersSetup, Live, Result, History,
-│                        # Detail, Roster, Stats, Settings
+│                        # Detail, Tournaments, Tournament Setup/Detail, Roster, Stats, Settings
 ├── App.tsx              # Chọn màn hình theo state.view
 └── styles.css           # Design tokens + theme (giữ nguyên từ prototype)
 ```
@@ -98,6 +115,6 @@ Ván kết thúc khi một đội đạt điểm đích và hơn đối thủ đ
 - Khóa lưu trữ mới `pickleball-scorekeeper:v1` (dữ liệu từ prototype `pk_proto_v1` không được chuyển sang).
 - Thêm trạng thái "Đã sao chép tóm tắt" khi trình duyệt không hỗ trợ Web Share.
 
-## Ý tưởng tiếp theo
+## Giới hạn và bước tiếp theo
 
-PWA (manifest + service worker để dùng offline), xuất lịch sử CSV, gắn tên người chơi quen thuộc để gợi ý khi nhập, đồng bộ đám mây.
+Giải đấu hiện chỉ lưu trên thiết bị; invitations, cộng tác đa tài khoản thực tế, đồng bộ, xử lý conflict, sửa kết quả có audit, báo cáo/PDF và chia sẻ kết quả giải chưa được bật. Để xác minh đăng nhập đầu-cuối, cần cấu hình Supabase project, email delivery và OAuth credentials/redirects như hướng dẫn ở trên.

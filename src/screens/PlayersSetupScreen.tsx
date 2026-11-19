@@ -1,6 +1,11 @@
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Segmented } from '../components/Segmented';
-import { defaultLabel, hasDuplicateNames, resolveTeams } from '../domain/players';
+import {
+  defaultLabel,
+  hasDuplicateNames,
+  prepareMatchPlayers,
+  resolveTeams,
+} from '../domain/players';
 import { useApp, useT } from '../store/AppContext';
 
 export function PlayersSetupScreen() {
@@ -30,9 +35,14 @@ export function PlayersSetupScreen() {
 
   const start = () => {
     if (duplicate) return;
+    const now = Date.now();
+    const matchPlayers = prepareMatchPlayers(state.players, state.cfg.type, state.names, now);
     dispatch({
       type: 'START_MATCH',
       names: resolveTeams(state.cfg.type, state.names, t('pln')),
+      players: matchPlayers.players,
+      playerIds: matchPlayers.playerIds,
+      now,
     });
   };
 

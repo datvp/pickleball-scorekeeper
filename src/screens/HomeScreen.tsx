@@ -1,12 +1,14 @@
 import { MatchCard } from '../components/MatchCard';
+import { TournamentCard } from '../components/TournamentCard';
 import { teamName } from '../domain/scoring';
 import { useApp, useT } from '../store/AppContext';
 
 export function HomeScreen() {
   const { state, dispatch } = useApp();
   const { t } = useT();
-  const { match, history } = state;
+  const { match, history, tournaments } = state;
   const recent = history.slice(0, 3);
+  const recentTournaments = tournaments.slice(0, 2);
 
   return (
     <div className="sc">
@@ -52,6 +54,23 @@ export function HomeScreen() {
         {t('quick')}
       </button>
 
+      <div className="row sp">
+        <h2>{t('tours')}</h2>
+        <button type="button" onClick={() => dispatch({ type: 'NAVIGATE', view: 'tournaments' })}>
+          {t('all')}
+        </button>
+      </div>
+      {recentTournaments.length ? (
+        recentTournaments.map((tournament) => (
+          <TournamentCard key={tournament.id} tournament={tournament} />
+        ))
+      ) : (
+        <div className="card">
+          <b>{t('tours')}</b>
+          <p className="mt">{t('noTournaments')}</p>
+        </div>
+      )}
+
       <h2>{t('recent')}</h2>
       {recent.length ? (
         recent.map((m, i) => <MatchCard key={m.id} match={m} index={i} />)
@@ -61,6 +80,22 @@ export function HomeScreen() {
           <p className="mt">{t('nonehint')}</p>
         </div>
       )}
+      <div className="row">
+        <button
+          type="button"
+          style={{ flex: 1 }}
+          onClick={() => dispatch({ type: 'NAVIGATE', view: 'history' })}
+        >
+          {t('hist')}
+        </button>
+        <button
+          type="button"
+          style={{ flex: 1 }}
+          onClick={() => dispatch({ type: 'NAVIGATE', view: 'stats' })}
+        >
+          {t('st')}
+        </button>
+      </div>
     </div>
   );
 }

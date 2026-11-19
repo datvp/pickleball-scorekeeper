@@ -2,6 +2,7 @@ import type {
   Match,
   MatchConfig,
   MatchSnapshot,
+  PlayerIds,
   SavedMatch,
   Score,
   TeamIndex,
@@ -18,10 +19,12 @@ export function createMatch(
   names: [string[], string[]],
   firstServer: TeamIndex,
   now: number = Date.now(),
+  playerIds?: PlayerIds,
 ): Match {
   return {
     cfg: { ...cfg },
     names,
+    playerIds: playerIds?.map((team) => [...team]) as PlayerIds | undefined,
     sc: [0, 0],
     sv: firstServer,
     sn: initialServerNumber(cfg),

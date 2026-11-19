@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Capacitor } from '@capacitor/core';
 import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
+import { AuthProvider } from './auth/AuthProvider';
 import { AppProvider } from './store/AppContext';
 import './styles.css';
 
@@ -12,8 +13,10 @@ if (!Capacitor.isNativePlatform()) {
 
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
-    <AppProvider>
-      <App />
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <App />
+      </AppProvider>
+    </AuthProvider>
   </StrictMode>,
 );

@@ -9,6 +9,7 @@ export function ResultScreen() {
   const [copied, setCopied] = useState(false);
   const m = state.match;
   if (!m || m.winner === undefined) return null;
+  const tournamentMatch = !!m.tournamentRef;
 
   const saved = state.history.some((h) => h.id === m.start);
 
@@ -55,15 +56,19 @@ export function ResultScreen() {
           {saved && '✓'} {t('save')}
         </button>
         <div className="row">
-          <button type="button" style={{ flex: 1 }} onClick={share}>
-            {t('share')}
-          </button>
+          {!tournamentMatch && (
+            <button type="button" style={{ flex: 1 }} onClick={share}>
+              {t('share')}
+            </button>
+          )}
           <button type="button" style={{ flex: 1 }} onClick={() => dispatch({ type: 'UNDO' })}>
             ↶ {t('undo')}
           </button>
-          <button type="button" style={{ flex: 1 }} onClick={() => dispatch({ type: 'NEW_MATCH' })}>
-            {t('newm')}
-          </button>
+          {!tournamentMatch && (
+            <button type="button" style={{ flex: 1 }} onClick={() => dispatch({ type: 'NEW_MATCH' })}>
+              {t('newm')}
+            </button>
+          )}
         </div>
       </div>
     </div>

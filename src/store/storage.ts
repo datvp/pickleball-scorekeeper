@@ -2,7 +2,7 @@ import type { AppState } from './reducer';
 
 const KEY = 'pickleball-scorekeeper:v1';
 
-type Persisted = Pick<AppState, 'settings' | 'history' | 'match'>;
+type Persisted = Pick<AppState, 'settings' | 'history' | 'match' | 'players' | 'tournaments'>;
 
 export function loadPersisted(): Partial<Persisted> {
   try {
@@ -19,6 +19,8 @@ export function savePersisted(state: AppState): void {
       settings: state.settings,
       history: state.history,
       match: state.match,
+      players: state.players,
+      tournaments: state.tournaments,
     };
     localStorage.setItem(KEY, JSON.stringify(data));
   } catch {
