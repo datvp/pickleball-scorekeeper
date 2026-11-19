@@ -413,4 +413,3 @@ export function fixtureMatchNames(
   if (!first || !second) return null;
   return [[...first.names], [...second.names]];
 }
-
